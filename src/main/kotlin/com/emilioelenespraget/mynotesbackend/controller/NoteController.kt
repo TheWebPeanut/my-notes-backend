@@ -3,8 +3,10 @@ package com.emilioelenespraget.mynotesbackend.controller
 import com.emilioelenespraget.mynotesbackend.database.model.Note
 import com.emilioelenespraget.mynotesbackend.database.model.repository.NoteRepository
 import org.bson.types.ObjectId
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import kotlin.time.Clock
 import kotlin.time.Instant
@@ -44,12 +46,25 @@ class NoteController(
             )
         )
 
-        return NoteResponse(
-            id = note.id.toHexString(),
-            title = note.title,
-            content = note.content,
-            color = note.color,
-            createdAt = note.createdAt,
-        )
+        return note.toResponse()
     }
+
+    @GetMapping("/getNotes")
+    fun findByOwnerId(
+        @RequestParam(required = true) ownerId: String,
+    ): List<NoteResponse> {
+        return repository.findByOwnerId(ObjectId(ownerId)).map {
+            it.toResponse()
+        }
+    }
+}
+
+private fun Note.toResponse(): NoteController.NoteResponse {
+    return NoteController.NoteResponse(
+        id = id.toHexString(),
+        title = title,
+        content = content,
+        color = color,
+        createdAt = createdAt,
+    )
 }

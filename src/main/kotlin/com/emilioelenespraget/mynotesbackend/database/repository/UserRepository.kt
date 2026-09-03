@@ -1,4 +1,4 @@
-package com.emilioelenespraget.mynotesbackend.database.model.repository
+package com.emilioelenespraget.mynotesbackend.database.repository
 
 import com.emilioelenespraget.mynotesbackend.database.model.User
 import org.bson.types.ObjectId

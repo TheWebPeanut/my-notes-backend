@@ -1,9 +1,8 @@
 package com.emilioelenespraget.mynotesbackend.controller
 
 import com.emilioelenespraget.mynotesbackend.database.model.Note
-import com.emilioelenespraget.mynotesbackend.database.model.repository.NoteRepository
+import com.emilioelenespraget.mynotesbackend.repository.NoteRepository
 import org.bson.types.ObjectId
-import org.springframework.data.mongodb.core.aggregation.MergeOperation.UniqueMergeId.id
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable

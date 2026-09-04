@@ -1,15 +1,15 @@
 package com.emilioelenespraget.mynotesbackend.controller
 
 import com.emilioelenespraget.mynotesbackend.database.model.Note
-import com.emilioelenespraget.mynotesbackend.repository.NoteRepository
+import com.emilioelenespraget.mynotesbackend.database.repository.NoteRepository
 import org.bson.types.ObjectId
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import kotlin.time.Clock
 import kotlin.time.Instant
@@ -52,9 +52,8 @@ class NoteController(private val repository: NoteRepository) {
     }
 
     @GetMapping("/getNotes")
-    fun findByOwnerId(
-        @RequestParam(required = true) ownerId: String,
-    ): List<NoteResponse> {
+    fun findByOwnerId(): List<NoteResponse> {
+        val ownerId = SecurityContextHolder.getContext().authentication?.principal as String
         return repository.findByOwnerId(ObjectId(ownerId)).map {
             it.toResponse()
         }

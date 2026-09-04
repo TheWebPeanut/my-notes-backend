@@ -54,7 +54,7 @@ class JwtService(
         return tokenType == "refresh"
     }
 
-    fun getUserIdFromJWT(token: String): String? {
+    fun getUserIdFromJWT(token: String): String {
         val claims = parseAllClaims(token) ?: throw IllegalArgumentException("Invalid token.")
         return claims.subject
     }

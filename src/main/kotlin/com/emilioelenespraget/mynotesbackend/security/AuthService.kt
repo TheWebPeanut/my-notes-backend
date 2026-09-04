@@ -8,8 +8,8 @@ import org.bson.types.ObjectId
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.stereotype.Service
 import java.security.MessageDigest
-import java.time.Instant
 import java.util.Base64
+import kotlin.time.Clock
 
 @Service
 class AuthService(
@@ -44,6 +44,36 @@ class AuthService(
         val newAccessToken = jwtService.generateAccessToken(user.id.toHexString())
         val newRefreshToken = jwtService.generateRefreshToken(user.id.toHexString())
 
+        storeRefreshToken(user.id, newRefreshToken)
+
+        return TokenPair(
+            newAccessToken,
+            newRefreshToken,
+        )
+    }
+
+    fun refresh(refreshToken: String): TokenPair {
+        if(!jwtService.validateRefreshToken(refreshToken)) {
+            throw IllegalArgumentException("Invalid refresh token.")
+        }
+
+        val userId = jwtService.getUserIdFromJWT(refreshToken)
+        val user = userRepository.findById(ObjectId(userId)).orElseThrow {
+            IllegalArgumentException("Invalid refresh token.")
+        }
+
+        val hashed = hashToken(refreshToken)
+
+        refreshTokenRepository.findByUserIdAndHashedToken(user.id, hashed)
+            ?: throw IllegalArgumentException("Refresh token not recognized: already used or expired.")
+
+        refreshTokenRepository.deleteByUserIdAndHashedToken(user.id, hashed)
+
+        val newAccessToken = jwtService.generateAccessToken(userId)
+        val newRefreshToken = jwtService.generateRefreshToken(userId)
+
+        storeRefreshToken(user.id, newRefreshToken)
+
         return TokenPair(
             newAccessToken,
             newRefreshToken,
@@ -53,12 +83,12 @@ class AuthService(
     private fun storeRefreshToken(userId: ObjectId, rawRefreshToken: String) {
         val hashed = hashToken(rawRefreshToken)
         val expiryMs = jwtService.refreshTokenValidityMs
-        val expiresAt = Instant.now().plusMillis(expiryMs.inWholeMilliseconds)
+        val expiresAt = Clock.System.now().plus(expiryMs)
 
         refreshTokenRepository.save(
             RefreshToken(
                 userId,
-                TODO(),
+                expiresAt,
                 hashed
             )
         )

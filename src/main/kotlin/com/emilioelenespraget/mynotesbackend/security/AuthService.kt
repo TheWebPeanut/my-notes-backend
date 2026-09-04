@@ -7,6 +7,7 @@ import com.emilioelenespraget.mynotesbackend.database.repository.UserRepository
 import org.bson.types.ObjectId
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.security.MessageDigest
 import java.util.Base64
 import kotlin.time.Clock
@@ -52,6 +53,7 @@ class AuthService(
         )
     }
 
+    @Transactional
     fun refresh(refreshToken: String): TokenPair {
         if(!jwtService.validateRefreshToken(refreshToken)) {
             throw IllegalArgumentException("Invalid refresh token.")
